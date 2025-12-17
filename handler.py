@@ -38,24 +38,57 @@ logger = logging.getLogger(__name__)
 # 注意：需要先初始化 wgp.py 的全局变量
 os.environ["GRADIO_LANG"] = "en"
 os.environ["GRADIO_ANALYTICS_ENABLED"] = "False"
+# 禁用 Gradio 启动（RunPod 环境不需要 UI）
+os.environ["GRADIO_SERVER_NAME"] = "0.0.0.0"
+os.environ["GRADIO_SERVER_PORT"] = "7860"
+
+logger.info("📦 开始导入 wgp 模块...")
 
 # 导入 wgp 模块以初始化全局变量
 # 注意：wgp.py 在导入时会执行初始化代码，包括解析参数和加载配置
-import wgp
+try:
+    import wgp
+    logger.info("✅ wgp 模块导入成功")
+except Exception as e:
+    logger.error(f"❌ wgp 模块导入失败: {e}")
+    import traceback
+    logger.error(traceback.format_exc())
+    raise
 
 # 等待 wgp 模块初始化完成
 import time
 time.sleep(0.1)  # 给初始化一点时间
 
+logger.info("📦 开始从 wgp 导入函数和变量...")
+
 # 从 wgp 导入必要的函数和变量
-from wgp import (
-    load_models, get_model_def, get_base_model_type, get_model_handler,
-    get_model_filename, get_local_model_filename, download_models,
-    transformer_quantization, transformer_dtype_policy, server_config,
-    model_types_handlers, models_def, args
-)
-from shared.utils.utils import convert_image_to_tensor, save_video, convert_tensor_to_image
-from shared.utils import files_locator as fl
+try:
+    from wgp import (
+        load_models, get_model_def, get_base_model_type, get_model_handler,
+        get_model_filename, get_local_model_filename, download_models,
+        transformer_quantization, transformer_dtype_policy, server_config,
+        model_types_handlers, models_def, args
+    )
+    logger.info("✅ wgp 函数和变量导入成功")
+except Exception as e:
+    logger.error(f"❌ wgp 函数和变量导入失败: {e}")
+    import traceback
+    logger.error(traceback.format_exc())
+    raise
+
+try:
+    from shared.utils.utils import convert_image_to_tensor, convert_tensor_to_image
+    from shared.utils.audio_video import save_video
+    from shared.utils import files_locator as fl
+    logger.info("✅ shared.utils 模块导入成功")
+except Exception as e:
+    logger.error(f"❌ shared.utils 模块导入失败: {e}")
+    import traceback
+    logger.error(traceback.format_exc())
+    raise
+
+logger.info("✅ 所有模块导入完成")
+
 
 # 全局变量存储模型
 wan_model = None
